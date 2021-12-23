@@ -121,13 +121,12 @@ def main():
 
 
 def get_packet_version(packet):
-    print ("DEBUG : subpacket = ", packet)
     version         = int(packet[0:3], 2)
     type_id         = int(packet[3:6], 2)
     current_length  = 6
 
+    # Literal value packet
     if (type_id == 4):
-        print ("Subpacket type LITERAL VALUE")
         last = False
         datas = packet[6:]
         literal_value = ""
@@ -140,23 +139,26 @@ def get_packet_version(packet):
             i+=1
         literal_value = int(literal_value, 2)
         print ("Literal value = ", literal_value, "\n")
-        print ("current_length after literal value = ", current_length)
 
+    # Operator packet
     else:
-        length_type = packet[6]
+        length_type     = packet[6]
+        current_length += 1
+        # Length type = number of bits
         if (length_type == '0'):
-            print ("Subpacket type OPERATOR LENGTH")
             length          = int(packet[7:22], 2)
-            current_length  += 16
+            current_length  += 15
             version_t, current_length_t = get_operator_0_versions(packet[22:], length)
+
+        # Lenght type = number of subpackets
         else :
-            print ("Subpacket type OPERATOR NUMBER")
             nb_packets      = int(packet[7:18], 2)
-            current_length  += 17
+            current_length  += 11
             version_t, current_length_t = get_operator_1_versions(packet[18:], nb_packets)
         version += version_t
         current_length += current_length_t
 
+    #Return version for this packet and total bit length of this packet
     return version, current_length
 
 
@@ -174,15 +176,12 @@ def get_operator_1_versions(packet, nb_packets):
     current_length = 0
     version = 0
     nb_subpackets = 0
-    print ("DEBUG : total subpacket = ", nb_packets)
     while (nb_subpackets < nb_packets):
-        print ("DEBUG : subpacket n = ", nb_subpackets)
         version_t, current_length_t = get_packet_version(packet[current_length:])
         version += version_t
         current_length += current_length_t
         nb_subpackets+=1
 
-    print ("DEBUG : output current_length = ", current_length)
     return version, current_length
 
 main()    
