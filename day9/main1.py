@@ -47,11 +47,11 @@ def main():
 
     for i in range(line):
         for j in range(col):
-            risk_level+=is_heightmap(array, i+1, j+1)
+            risk_level+=is_lowpoint(array, i+1, j+1)
 
     print (risk_level)
 
-def is_heightmap(array, i, j):
+def is_lowpoint(array, i, j):
     minimum = array[i][j]
     if ((array[i-1][j] <= minimum) or (array[i+1][j] <= minimum) or (array[i][j-1] <= minimum) or (array[i][j+1] <= minimum)):
         return 0
